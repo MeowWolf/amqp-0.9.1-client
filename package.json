@@ -1,6 +1,6 @@
 {
   "name": "@meowwolf/amqp-0.9.1-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "AMQP 0-9-1 Broker Client",
   "main": "dist/app.js",
   "scripts": {
@@ -12,16 +12,19 @@
     "test:cov": "jest --verbose --collect-coverage"
   },
   "keywords": [],
-  "author": "Amo DelBello",
+  "author": "Amo DelBello <adelbello@meowwolf.com>",
   "license": "ISC",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
+    "@types/amqplib": "^0.5.16",
     "amqplib": "^0.6.0",
     "bunyan": "^1.8.14",
     "bunyan-prettystream": "^0.1.3",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.5.16",
     "@types/bunyan": "^1.8.6",
     "@types/bunyan-prettystream": "^0.1.31",
     "@types/jest": "^26.0.19",
@@ -44,7 +47,6 @@
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^26.4.4",
-    "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   }
 }

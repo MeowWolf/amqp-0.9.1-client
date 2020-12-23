@@ -12,6 +12,7 @@ import {
   QueueConfig,
   RoutingKey,
 } from './types'
+export * from './types'
 
 const defaultExchangeConfig: ExchangeConfig = {
   name: 'amq.direct',
