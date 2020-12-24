@@ -1,10 +1,13 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-const PRETTY_LOGS = !!process.env.PRETTY_LOGS || true
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug'
 
-export const config = {
-  prettyPrintLogs: PRETTY_LOGS,
-  logLevel: LOG_LEVEL,
-}
+export const prettyPrintLogs = true
+export const logLevel = LOG_LEVEL
+export const defaultAutoReconnect = true
+export const defaultRetryConnectionInterval = 5000
+export const defaultPrefetch = 0
+export const defaultTls = false
+export const defaultVhost = '/'
+export const defaultAppId = '@meowwolf/amqp-0.9.1-client'

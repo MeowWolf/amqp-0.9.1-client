@@ -1,7 +1,6 @@
 import bunyan, { LogLevel } from 'bunyan'
 import PrettyStream from 'bunyan-prettystream'
-import { config } from './config'
-const { prettyPrintLogs, logLevel } = config
+import { prettyPrintLogs, logLevel } from './config'
 
 const prettyStdOut = new PrettyStream()
 prettyStdOut.pipe(process.stdout)

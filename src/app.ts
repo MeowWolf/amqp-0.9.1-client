@@ -1,5 +1,12 @@
 import { connect, Connection, Channel, Replies, ConsumeMessage } from 'amqplib'
-import { config as appConfig } from './config'
+import {
+  defaultAppId,
+  defaultVhost,
+  defaultTls,
+  defaultPrefetch,
+  defaultAutoReconnect,
+  defaultRetryConnectionInterval,
+} from './config'
 import { log } from './logger'
 import {
   AssembledMessage,
@@ -80,8 +87,10 @@ export class AmqpClient {
   private async reconnect(): Promise<void> {
     log.warn('AMQP connection closed!')
     const { autoReconnect, retryConnectionInterval } = this.config
+    const doAutoReconnect =
+      autoReconnect !== undefined ? autoReconnect : /* istanbul ignore next */ defaultAutoReconnect
 
-    if (autoReconnect) {
+    if (doAutoReconnect) {
       log.info('Attempting to reconnect...')
       setTimeout(async () => {
         try {
@@ -90,15 +99,15 @@ export class AmqpClient {
         } catch (e) {
           log.info('Unable to reconnect: ', e)
         }
-      }, retryConnectionInterval)
+      }, retryConnectionInterval || /* istanbul ignore next */ defaultRetryConnectionInterval)
     }
   }
 
   private async createChannel(): Promise<void> {
     const { prefetch } = this.config
-
+    const prefetchCount = prefetch !== undefined ? prefetch : defaultPrefetch
     this.channel = await this.connection.createChannel()
-    this.channel.prefetch(Number(prefetch))
+    this.channel.prefetch(Number(prefetchCount))
 
     this.channel.on('error', (e): void => {
       throw new Error(`AMQP Channel Error: ${e}`)
@@ -150,7 +159,9 @@ export class AmqpClient {
     payload: string,
     options?: { name?: string; routingKey?: RoutingKey; correlationId?: string; headers?: GenericObject },
   ): AmqpClient {
-    const { appId } = this.config
+    const { appId: configAppId } = this.config
+    const appId = configAppId || defaultAppId
+
     const config = {
       ...this.exchangeConfig,
       ...options,
@@ -169,7 +180,9 @@ export class AmqpClient {
     payload: string,
     options?: { name: string; correlationId?: string; headers?: GenericObject },
   ): AmqpClient {
-    const { appId } = this.config
+    const { appId: configAppId } = this.config
+    const appId = configAppId || defaultAppId
+
     const config = {
       ...this.exchangeConfig,
       ...options,
@@ -227,8 +240,9 @@ export class AmqpClient {
   private static getBrokerUrl(config: Config): string {
     const { host, port, vhost, tls, username, password } = config
 
-    const protocol = tls ? 'amqps' : 'amqp'
-    const vhostName = vhost ? vhost : '/'
+    const yesTls = tls !== undefined ? tls : defaultTls
+    const protocol = yesTls ? 'amqps' : 'amqp'
+    const vhostName = vhost || defaultVhost
 
     const url = `${protocol}://${username}:${password}@${host}:${port}${vhostName}`
     return url

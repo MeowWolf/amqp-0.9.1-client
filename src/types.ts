@@ -11,7 +11,7 @@ export interface Config {
   tls?: boolean
   prefetch?: number
   autoReconnect?: boolean
-  retryConnectionInterval: number
+  retryConnectionInterval?: number
 }
 
 export enum ExchangeType {

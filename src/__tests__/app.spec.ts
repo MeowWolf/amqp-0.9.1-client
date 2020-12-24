@@ -57,7 +57,7 @@ describe('AmqpClient', () => {
     })
 
     it('initializes with alternate config', async () => {
-      const amqp = new AmqpClient({ ...amqpConfigFixture, vhost: '', tls: true, autoReconnect: false })
+      const amqp = new AmqpClient({ ...amqpConfigFixture, vhost: '', tls: true, prefetch: undefined })
       const initializedAmqp = await amqp.init()
       expect(initializedAmqp).toBeTruthy()
     })
