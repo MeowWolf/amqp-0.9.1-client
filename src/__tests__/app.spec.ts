@@ -1,8 +1,19 @@
 import { ConsumeMessage } from 'amqplib'
-import { config } from '../config'
 import { AmqpClient, establishRabbitMqConnection } from '../app'
-import { Consumer, ExchangeConfig, ExchangeType, QueueConfig } from '../types'
+import { Config, Consumer, ExchangeConfig, ExchangeType, QueueConfig } from '../types'
 import { log } from '../logger'
+
+const amqpConfigFixture: Config = {
+  host: '127.0.0.1',
+  port: 5672,
+  vhost: '/',
+  exchangeName: 'amq.topic',
+  autoReconnect: true,
+  prefetch: 0,
+  retryConnectionInterval: 5000,
+  username: 'rabbitmq',
+  password: 'rabbitmq',
+}
 
 const queueConfigFixture: QueueConfig = {
   name: '',
@@ -29,7 +40,7 @@ beforeAll(() => {
 let amqp: AmqpClient
 beforeEach(() => {
   jest.useFakeTimers()
-  amqp = new AmqpClient(config.amqp)
+  amqp = new AmqpClient(amqpConfigFixture)
 })
 
 afterEach(() => {
@@ -46,7 +57,7 @@ describe('AmqpClient', () => {
     })
 
     it('initializes with alternate config', async () => {
-      const amqp = new AmqpClient({ ...config.amqp, vhost: '', tls: true, autoReconnect: false })
+      const amqp = new AmqpClient({ ...amqpConfigFixture, vhost: '', tls: true, autoReconnect: false })
       const initializedAmqp = await amqp.init()
       expect(initializedAmqp).toBeTruthy()
     })
@@ -92,7 +103,7 @@ describe('AmqpClient', () => {
     })
 
     it('does not auto reconnect', async () => {
-      const amqp = new AmqpClient({ ...config.amqp, autoReconnect: false })
+      const amqp = new AmqpClient({ ...amqpConfigFixture, autoReconnect: false })
       const initializedAmqp = await amqp.init()
       initializedAmqp.connection.emit('close')
       jest.advanceTimersByTime(5000)

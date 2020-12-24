@@ -150,7 +150,7 @@ export class AmqpClient {
     payload: string,
     options?: { name?: string; routingKey?: RoutingKey; correlationId?: string; headers?: GenericObject },
   ): AmqpClient {
-    const { appId } = appConfig
+    const { appId } = this.config
     const config = {
       ...this.exchangeConfig,
       ...options,
@@ -169,7 +169,7 @@ export class AmqpClient {
     payload: string,
     options?: { name: string; correlationId?: string; headers?: GenericObject },
   ): AmqpClient {
-    const { appId } = appConfig
+    const { appId } = this.config
     const config = {
       ...this.exchangeConfig,
       ...options,
@@ -248,8 +248,10 @@ export class AmqpClient {
   }
 }
 
-export const establishRabbitMqConnection = async (exchangeConfig?: ExchangeConfig): Promise<AmqpClient> => {
-  const { amqp: amqpConfig } = appConfig
+export const establishRabbitMqConnection = async (
+  amqpConfig?: Config,
+  exchangeConfig?: ExchangeConfig,
+): Promise<AmqpClient> => {
   const amqpClient = new AmqpClient(amqpConfig)
 
   try {

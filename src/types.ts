@@ -6,6 +6,7 @@ export interface Config {
   exchangeName: string
   username: string
   password: string
+  appId?: string
   vhost?: string
   tls?: boolean
   prefetch?: number
