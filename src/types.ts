@@ -3,14 +3,14 @@ import { ConsumeMessage } from 'amqplib'
 export interface Config {
   host: string
   port: number
-  vhost?: string
   exchangeName: string
+  username: string
+  password: string
+  vhost?: string
   tls?: boolean
   prefetch?: number
   autoReconnect?: boolean
   retryConnectionInterval: number
-  username: string
-  password: string
 }
 
 export enum ExchangeType {

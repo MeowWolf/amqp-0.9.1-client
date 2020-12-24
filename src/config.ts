@@ -5,7 +5,7 @@ const APP_NAME = 'amqp-0.9.1-client'
 const PRETTY_LOGS = !!process.env.PRETTY_LOGS || true
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug'
 const RETRY_CONNECTION_INTERVAL = Number(process.env.RETRY_CONNECTION_INTERVAL) || 5000
-const NODE_ENV = process.env.NODE_ENV || 'development'
+const NODE_ENV = process.env.NODE_ENV || /* istanbul ignore next */ 'development'
 const NODE_HOST = process.env.NODE_HOST || '127.0.0.1'
 const AMQP_HOST = process.env.AMQP_HOST || 'rabbit'
 const AMQP_VHOST = process.env.AMQP_VHOST || '/'
@@ -17,7 +17,7 @@ const AMQP_EXCHANGE_NAME = process.env.AMQP_EXCHANGE_NAME || 'amq.topic'
 const AMQP_PREFETCH_COUNT = process.env.AMQP_PREFETCH_COUNT || 0
 
 export const config = {
-  name: `${APP_NAME}-${NODE_ENV}`,
+  appId: `${APP_NAME}-${NODE_ENV}`,
   prettyPrintLogs: PRETTY_LOGS,
   logLevel: LOG_LEVEL,
   address: NODE_HOST,

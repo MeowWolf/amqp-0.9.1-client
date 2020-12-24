@@ -41,11 +41,17 @@ function connect(): Promise<any> {
         callback(amqpMessage)
       }),
       ack: jest.fn(),
-      publish: jest.fn(),
+      publish: jest
+        .fn()
+        .mockImplementationOnce(() => true)
+        .mockImplementationOnce(() => {
+          throw new Error()
+        }),
       assertQueue: jest.fn().mockResolvedValue({
         queue: {},
       }),
       bindQueue: jest.fn(),
+      sendToQueue: jest.fn(),
     }),
   })
 }

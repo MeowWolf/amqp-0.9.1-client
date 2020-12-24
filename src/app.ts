@@ -130,7 +130,7 @@ export class AmqpClient {
     const q = await this.assertQueue(config)
     this.bindQueue(q, config.routingKey)
     const { noAck } = config
-    await this.channel?.consume(
+    await this.channel.consume(
       q.queue,
       amqpMessage => {
         const message = AmqpClient.assembleMessage(amqpMessage)
@@ -150,14 +150,14 @@ export class AmqpClient {
     payload: string,
     options?: { name?: string; routingKey?: RoutingKey; correlationId?: string; headers?: GenericObject },
   ): AmqpClient {
-    const { name: appName } = appConfig
+    const { appId } = appConfig
     const config = {
       ...this.exchangeConfig,
       ...options,
     }
     const { name, routingKey, correlationId, headers } = config
     try {
-      this.channel.publish(name, routingKey, Buffer.from(payload), { appId: appName, correlationId, headers })
+      this.channel.publish(name, routingKey, Buffer.from(payload), { appId, correlationId, headers })
     } catch (e) {
       log.warn('Exception while publishing message:', e.message)
     }
@@ -169,13 +169,13 @@ export class AmqpClient {
     payload: string,
     options?: { name: string; correlationId?: string; headers?: GenericObject },
   ): AmqpClient {
-    const { name: appName } = appConfig
+    const { appId } = appConfig
     const config = {
       ...this.exchangeConfig,
       ...options,
     }
     const { name, correlationId, headers } = config
-    this.channel.sendToQueue(name, Buffer.from(payload), { appId: appName, correlationId, headers })
+    this.channel.sendToQueue(name, Buffer.from(payload), { appId, correlationId, headers })
 
     return this
   }
@@ -184,7 +184,7 @@ export class AmqpClient {
     const { name, exclusive, durable, autoDelete } = queueConfig
     let queue: Replies.AssertQueue | null = null
 
-    queue = await this.channel?.assertQueue(name, {
+    queue = await this.channel.assertQueue(name, {
       exclusive,
       durable,
       autoDelete,
@@ -195,18 +195,18 @@ export class AmqpClient {
 
   private bindQueue(q: Replies.AssertQueue, routingKey: RoutingKey): void {
     const { name } = this.exchangeConfig
-    this.channel?.bindQueue(q.queue, name, routingKey)
+    this.channel.bindQueue(q.queue, name, routingKey)
   }
 
   public async close(): Promise<void> {
     try {
-      await this.channel?.close()
+      await this.channel.close()
     } catch (e) {
       /* istanbul ignore next */
       log.warn('Exception while closing channel:', e.message)
     }
     try {
-      await this.connection?.close()
+      await this.connection.close()
     } catch (e) {
       /* istanbul ignore next */
       log.warn('Exception while closing connection:', e.message)
@@ -255,6 +255,7 @@ export const establishRabbitMqConnection = async (exchangeConfig?: ExchangeConfi
   try {
     await amqpClient.init(exchangeConfig || defaultExchangeConfig)
   } catch (e) {
+    /* istanbul ignore next */
     log.error(e)
   }
   return amqpClient

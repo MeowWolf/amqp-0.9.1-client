@@ -1,11 +1,12 @@
 import { ConsumeMessage } from 'amqplib'
 import { config } from '../config'
-import { AmqpClient } from '../app'
+import { AmqpClient, establishRabbitMqConnection } from '../app'
 import { Consumer, ExchangeConfig, ExchangeType, QueueConfig } from '../types'
 import { log } from '../logger'
 
 const queueConfigFixture: QueueConfig = {
   name: '',
+  routingKey: 'test-routing-key',
   exclusive: true,
   durable: false,
   autoDelete: true,
@@ -33,6 +34,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.restoreAllMocks()
+  jest.clearAllMocks()
   amqp.close()
 })
 
@@ -44,7 +46,7 @@ describe('AmqpClient', () => {
     })
 
     it('initializes with alternate config', async () => {
-      const amqp = new AmqpClient({ ...config.amqp, vhost: 'vhost-name', tls: true, autoReconnect: false })
+      const amqp = new AmqpClient({ ...config.amqp, vhost: '', tls: true, autoReconnect: false })
       const initializedAmqp = await amqp.init()
       expect(initializedAmqp).toBeTruthy()
     })
@@ -62,6 +64,20 @@ describe('AmqpClient', () => {
       const addConsumer = jest.spyOn(amqp, 'addConsumer')
 
       const initializedAmqp = await amqp.init(exchangeConfigFixture, [consumer])
+      expect(initializedAmqp).toBeTruthy()
+      expect(addConsumer).toHaveBeenNthCalledWith<[Consumer]>(1, consumer)
+      initializedAmqp.close()
+    })
+
+    it('initializes with duplicate consumers', async () => {
+      const callback = jest.fn()
+      const consumer: Consumer = {
+        config: queueConfigFixture,
+        callback,
+      }
+      const addConsumer = jest.spyOn(amqp, 'addConsumer')
+
+      const initializedAmqp = await amqp.init(exchangeConfigFixture, [consumer, consumer])
       expect(initializedAmqp).toBeTruthy()
       expect(addConsumer).toHaveBeenNthCalledWith<[Consumer]>(1, consumer)
       initializedAmqp.close()
@@ -89,6 +105,24 @@ describe('AmqpClient', () => {
       const initializedAmqp = await amqp.init()
       initializedAmqp.publish('I drank what?')
       expect(initializedAmqp.channel.publish).toHaveBeenCalledTimes(1)
+
+      // warns when there's an error
+      initializedAmqp.publish('I drank what?')
+      expect(log.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Exception while publishing message:'),
+        expect.anything(),
+      )
+    })
+  })
+
+  describe('sendToQueue()', () => {
+    it('sends a message to a queue', async () => {
+      const payload = "It's coherent light."
+      const name = 'So it talks, right?'
+
+      const initializedAmqp = await amqp.init()
+      initializedAmqp.sendToQueue(payload, { name })
+      expect(initializedAmqp.channel.sendToQueue).toHaveBeenCalledWith(name, expect.anything(), expect.anything())
     })
   })
 
@@ -99,6 +133,13 @@ describe('AmqpClient', () => {
         ...(({} as unknown) as ConsumeMessage),
         payload: { a: 'payload' },
       })
+    })
+  })
+
+  describe('establishRabbitMqConnection()', () => {
+    it('establishes a connection with default config', async () => {
+      const amqpClient = await establishRabbitMqConnection()
+      expect(amqpClient).toBeInstanceOf(AmqpClient)
     })
   })
 
