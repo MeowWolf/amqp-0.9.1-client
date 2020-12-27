@@ -1,6 +1,6 @@
 import { ConsumeMessage } from 'amqplib'
 
-export interface Config {
+export interface AmqpConfig {
   host: string
   port: number
   exchangeName: string
@@ -24,7 +24,7 @@ export enum ExchangeType {
 export type RoutingKey = string
 
 export interface ExchangeConfig {
-  name?: string
+  exchangeName?: string
   type?: ExchangeType
   routingKey?: RoutingKey
   durable?: boolean
@@ -32,12 +32,25 @@ export interface ExchangeConfig {
 }
 
 export interface QueueConfig {
-  name?: string
+  queueName?: string
   routingKey?: RoutingKey
   exclusive?: boolean
   durable?: boolean
   autoDelete?: boolean
   noAck?: boolean
+}
+
+export interface PublishOptions {
+  exchangeName?: string
+  routingKey?: RoutingKey
+  correlationId?: string
+  headers?: GenericObject
+}
+
+export interface SendToQueueOptions {
+  queueName: string
+  correlationId?: string
+  headers?: GenericObject
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

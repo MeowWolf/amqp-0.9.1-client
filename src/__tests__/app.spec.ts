@@ -1,9 +1,9 @@
 import { ConsumeMessage } from 'amqplib'
 import { AmqpClient, establishRabbitMqConnection } from '../app'
-import { Config, Consumer, ExchangeConfig, ExchangeType, QueueConfig } from '../types'
+import { AmqpConfig, Consumer, ExchangeConfig, ExchangeType, QueueConfig } from '../types'
 import { log } from '../logger'
 
-const amqpConfigFixture: Config = {
+const amqpConfigFixture: AmqpConfig = {
   host: '127.0.0.1',
   port: 5672,
   vhost: '/',
@@ -16,7 +16,7 @@ const amqpConfigFixture: Config = {
 }
 
 const queueConfigFixture: QueueConfig = {
-  name: '',
+  queueName: '',
   routingKey: 'test-routing-key',
   exclusive: true,
   durable: false,
@@ -24,7 +24,7 @@ const queueConfigFixture: QueueConfig = {
 }
 
 const exchangeConfigFixture: ExchangeConfig = {
-  name: 'test-exchange',
+  exchangeName: 'test-exchange',
   type: ExchangeType.Direct,
   routingKey: 'test-routing-key',
   durable: true,
@@ -129,11 +129,11 @@ describe('AmqpClient', () => {
   describe('sendToQueue()', () => {
     it('sends a message to a queue', async () => {
       const payload = "It's coherent light."
-      const name = 'So it talks, right?'
+      const queueName = 'So it talks, right?'
 
       const initializedAmqp = await amqp.init()
-      initializedAmqp.sendToQueue(payload, { name })
-      expect(initializedAmqp.channel.sendToQueue).toHaveBeenCalledWith(name, expect.anything(), expect.anything())
+      initializedAmqp.sendToQueue(payload, { queueName })
+      expect(initializedAmqp.channel.sendToQueue).toHaveBeenCalledWith(queueName, expect.anything(), expect.anything())
     })
   })
 

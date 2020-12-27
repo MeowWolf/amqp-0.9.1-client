@@ -10,19 +10,20 @@ import {
 import { log } from './logger'
 import {
   AssembledMessage,
-  Config,
+  AmqpConfig,
   Consumer,
   ConsumerCallback,
   ExchangeConfig,
   ExchangeType,
-  GenericObject,
   QueueConfig,
   RoutingKey,
+  PublishOptions,
+  SendToQueueOptions,
 } from './types'
 export * from './types'
 
 const defaultExchangeConfig: ExchangeConfig = {
-  name: 'amq.direct',
+  exchangeName: 'amq.direct',
   type: ExchangeType.Direct,
   routingKey: '',
   durable: false,
@@ -30,7 +31,7 @@ const defaultExchangeConfig: ExchangeConfig = {
 }
 
 const defaultQueueConfig: QueueConfig = {
-  name: '',
+  queueName: '',
   exclusive: true,
   durable: false,
   autoDelete: true,
@@ -43,7 +44,7 @@ export class AmqpClient {
   private exchangeConfig: ExchangeConfig
   private consumers: Consumer[] = []
 
-  constructor(private config: Config) {}
+  constructor(private config: AmqpConfig) {}
 
   public async init(exchangeConfig: ExchangeConfig = {}, consumers: Consumer[] = []): Promise<AmqpClient> {
     this.exchangeConfig = {
@@ -115,9 +116,9 @@ export class AmqpClient {
   }
 
   private async assertExchange(): Promise<void> {
-    const { name, type, durable, autoDelete } = this.exchangeConfig
+    const { exchangeName, type, durable, autoDelete } = this.exchangeConfig
 
-    await this.channel.assertExchange(name, type, {
+    await this.channel.assertExchange(exchangeName, type, {
       durable: durable,
       autoDelete: autoDelete,
     })
@@ -155,10 +156,7 @@ export class AmqpClient {
     this.channel.ack(message)
   }
 
-  public publish(
-    payload: string,
-    options?: { name?: string; routingKey?: RoutingKey; correlationId?: string; headers?: GenericObject },
-  ): AmqpClient {
+  public publish(payload: string, options?: PublishOptions): AmqpClient {
     const { appId: configAppId } = this.config
     const appId = configAppId || defaultAppId
 
@@ -166,9 +164,9 @@ export class AmqpClient {
       ...this.exchangeConfig,
       ...options,
     }
-    const { name, routingKey, correlationId, headers } = config
+    const { exchangeName, routingKey, correlationId, headers } = config
     try {
-      this.channel.publish(name, routingKey, Buffer.from(payload), { appId, correlationId, headers })
+      this.channel.publish(exchangeName, routingKey, Buffer.from(payload), { appId, correlationId, headers })
     } catch (e) {
       log.warn('Exception while publishing message:', e.message)
     }
@@ -176,28 +174,21 @@ export class AmqpClient {
     return this
   }
 
-  public sendToQueue(
-    payload: string,
-    options?: { name: string; correlationId?: string; headers?: GenericObject },
-  ): AmqpClient {
+  public sendToQueue(payload: string, options: SendToQueueOptions): AmqpClient {
     const { appId: configAppId } = this.config
     const appId = configAppId || defaultAppId
 
-    const config = {
-      ...this.exchangeConfig,
-      ...options,
-    }
-    const { name, correlationId, headers } = config
-    this.channel.sendToQueue(name, Buffer.from(payload), { appId, correlationId, headers })
+    const { queueName, correlationId, headers } = options
+    this.channel.sendToQueue(queueName, Buffer.from(payload), { appId, correlationId, headers })
 
     return this
   }
 
   private async assertQueue(queueConfig: QueueConfig): Promise<Replies.AssertQueue | null> {
-    const { name, exclusive, durable, autoDelete } = queueConfig
+    const { queueName, exclusive, durable, autoDelete } = queueConfig
     let queue: Replies.AssertQueue | null = null
 
-    queue = await this.channel.assertQueue(name, {
+    queue = await this.channel.assertQueue(queueName, {
       exclusive,
       durable,
       autoDelete,
@@ -207,8 +198,8 @@ export class AmqpClient {
   }
 
   private bindQueue(q: Replies.AssertQueue, routingKey: RoutingKey): void {
-    const { name } = this.exchangeConfig
-    this.channel.bindQueue(q.queue, name, routingKey)
+    const { exchangeName } = this.exchangeConfig
+    this.channel.bindQueue(q.queue, exchangeName, routingKey)
   }
 
   public async close(): Promise<void> {
@@ -237,7 +228,7 @@ export class AmqpClient {
     return reducedConsumers
   }
 
-  private static getBrokerUrl(config: Config): string {
+  private static getBrokerUrl(config: AmqpConfig): string {
     const { host, port, vhost, tls, username, password } = config
 
     const yesTls = tls !== undefined ? tls : defaultTls
@@ -263,7 +254,7 @@ export class AmqpClient {
 }
 
 export const establishRabbitMqConnection = async (
-  amqpConfig?: Config,
+  amqpConfig?: AmqpConfig,
   exchangeConfig?: ExchangeConfig,
 ): Promise<AmqpClient> => {
   const amqpClient = new AmqpClient(amqpConfig)
