@@ -14,29 +14,30 @@ $ npm i @meowwolf/amqp-0.9.1-client
 
 ```javascript
 import { establishRabbitMqConnection } from '@meowwolf/amqp-0.9.1-client'
+// or
+const { establishRabbitMqConnection } = require('@meowwolf/amqp-0.9.1-client')
 
-const amqpClient = establishRabbitMqConnection(amqpConfig, exchangeConfig)
+const amqpClient = await establishRabbitMqConnection(amqpConfig, exchangeConfig)
 
 /*
 AmqpConfig {
   host: string
   port: number
-  exchangeName: string
   username: string
   password: string
-  appId?: string
-  vhost?: string
-  tls?: boolean
-  prefetch?: number
-  autoReconnect?: boolean
-  retryConnectionInterval?: number
+  appId?: string - default: '@meowwolf/amqp-0.9.1-client'
+  vhost?: string - default: '/'
+  tls?: boolean - default: false
+  prefetch?: number - default: 0
+  autoReconnect?: boolean - default: true
+  retryConnectionInterval?: number in ms - default: 5000
 }
 
 ExchangeConfig {
-  exchangeName?: string
-  type?: 'direct' | 'fanout' | 'topic' | 'header'
-  routingKey?: string
-  durable?: boolean
+  exchangeName?: string - default: 'amq.direct'
+  type?: 'direct' | 'fanout' | 'topic' | 'header' - default: 'direct'
+  routingKey?: string - default: ''
+  durable?: boolean - default: false
   autoDelete?: boolean
 }
 */
@@ -56,12 +57,12 @@ await amqpClient.addConsumer({
 
 /*
 QueueConfig {
-  queueName?: string
-  routingKey?: string
-  exclusive?: boolean
-  durable?: boolean
-  autoDelete?: boolean
-  noAck?: boolean
+  queueName?: string - default: ''
+  routingKey?: string - default: ''
+  exclusive?: boolean - default: true
+  durable?: boolean - default: false
+  autoDelete?: boolean - default: true
+  noAck?: boolean - default: true
 }
 */
 ```
@@ -79,10 +80,10 @@ amqpClient.publish(payloadString, publishOptions)
 
 /*
 PublishOptions {
-  exchangeName?: string
-  routingKey?: RoutingKey
-  correlationId?: string
-  headers?: GenericObject
+  exchangeName?: string - defaults to exchangeConfig value
+  routingKey?: RoutingKey - defaults to exchangeConfig value
+  correlationId?: string - default: ''
+  headers?: GenericObject - default: {}
 }
 */
 ```
@@ -95,8 +96,8 @@ amqpClient.sendToQueue(payloadString, sendToQueueOptions)
 /*
 SendToQueueOptions {
   queueName: string
-  correlationId?: string
-  headers?: GenericObject
+  correlationId?: string - default: ''
+  headers?: GenericObject - default: {}
 }
 */
 ```

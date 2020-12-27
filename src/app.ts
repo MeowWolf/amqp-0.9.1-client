@@ -1,20 +1,12 @@
 import { connect, Connection, Channel, Replies, ConsumeMessage } from 'amqplib'
-import {
-  defaultAppId,
-  defaultVhost,
-  defaultTls,
-  defaultPrefetch,
-  defaultAutoReconnect,
-  defaultRetryConnectionInterval,
-} from './config'
 import { log } from './logger'
+import { defaultExchangeConfig, defaultAmqpConfig, defaultQueueConfig, defaultPublishOptions } from './config'
 import {
   AssembledMessage,
   AmqpConfig,
   Consumer,
   ConsumerCallback,
   ExchangeConfig,
-  ExchangeType,
   QueueConfig,
   RoutingKey,
   PublishOptions,
@@ -22,29 +14,34 @@ import {
 } from './types'
 export * from './types'
 
-const defaultExchangeConfig: ExchangeConfig = {
-  exchangeName: 'amq.direct',
-  type: ExchangeType.Direct,
-  routingKey: '',
-  durable: false,
-  autoDelete: true,
-}
+export const establishRabbitMqConnection = async (
+  amqpConfig: AmqpConfig,
+  exchangeConfig: ExchangeConfig,
+): Promise<AmqpClient> => {
+  const amqpClient = new AmqpClient(amqpConfig)
 
-const defaultQueueConfig: QueueConfig = {
-  queueName: '',
-  exclusive: true,
-  durable: false,
-  autoDelete: true,
-  noAck: true,
+  try {
+    await amqpClient.init(exchangeConfig || defaultExchangeConfig)
+  } catch (e) {
+    /* istanbul ignore next */
+    log.error(e)
+  }
+  return amqpClient
 }
 
 export class AmqpClient {
-  public connection: Connection
-  public channel: Channel
+  private amqpConfig: AmqpConfig
   private exchangeConfig: ExchangeConfig
   private consumers: Consumer[] = []
+  public connection: Connection
+  public channel: Channel
 
-  constructor(private config: AmqpConfig) {}
+  constructor(config: AmqpConfig) {
+    this.amqpConfig = {
+      ...defaultAmqpConfig,
+      ...config,
+    }
+  }
 
   public async init(exchangeConfig: ExchangeConfig = {}, consumers: Consumer[] = []): Promise<AmqpClient> {
     this.exchangeConfig = {
@@ -74,7 +71,7 @@ export class AmqpClient {
   }
 
   private async connect(): Promise<void> {
-    const brokerUrl = AmqpClient.getBrokerUrl(this.config)
+    const brokerUrl = AmqpClient.getBrokerUrl(this.amqpConfig)
     this.connection = await connect(brokerUrl)
     log.info(`AMQP Successfully connected to ${brokerUrl} `)
 
@@ -87,11 +84,9 @@ export class AmqpClient {
 
   private async reconnect(): Promise<void> {
     log.warn('AMQP connection closed!')
-    const { autoReconnect, retryConnectionInterval } = this.config
-    const doAutoReconnect =
-      autoReconnect !== undefined ? autoReconnect : /* istanbul ignore next */ defaultAutoReconnect
+    const { autoReconnect, retryConnectionInterval } = this.amqpConfig
 
-    if (doAutoReconnect) {
+    if (autoReconnect) {
       log.info('Attempting to reconnect...')
       setTimeout(async () => {
         try {
@@ -100,15 +95,14 @@ export class AmqpClient {
         } catch (e) {
           log.info('Unable to reconnect: ', e)
         }
-      }, retryConnectionInterval || /* istanbul ignore next */ defaultRetryConnectionInterval)
+      }, retryConnectionInterval)
     }
   }
 
   private async createChannel(): Promise<void> {
-    const { prefetch } = this.config
-    const prefetchCount = prefetch !== undefined ? prefetch : defaultPrefetch
+    const { prefetch } = this.amqpConfig
     this.channel = await this.connection.createChannel()
-    this.channel.prefetch(Number(prefetchCount))
+    this.channel.prefetch(Number(prefetch))
 
     this.channel.on('error', (e): void => {
       throw new Error(`AMQP Channel Error: ${e}`)
@@ -157,11 +151,11 @@ export class AmqpClient {
   }
 
   public publish(payload: string, options?: PublishOptions): AmqpClient {
-    const { appId: configAppId } = this.config
-    const appId = configAppId || defaultAppId
+    const { appId } = this.amqpConfig
 
     const config = {
       ...this.exchangeConfig,
+      ...defaultPublishOptions,
       ...options,
     }
     const { exchangeName, routingKey, correlationId, headers } = config
@@ -175,10 +169,14 @@ export class AmqpClient {
   }
 
   public sendToQueue(payload: string, options: SendToQueueOptions): AmqpClient {
-    const { appId: configAppId } = this.config
-    const appId = configAppId || defaultAppId
+    const { appId } = this.amqpConfig
 
-    const { queueName, correlationId, headers } = options
+    const config = {
+      ...defaultPublishOptions,
+      ...options,
+    }
+
+    const { queueName, correlationId, headers } = config
     this.channel.sendToQueue(queueName, Buffer.from(payload), { appId, correlationId, headers })
 
     return this
@@ -231,11 +229,9 @@ export class AmqpClient {
   private static getBrokerUrl(config: AmqpConfig): string {
     const { host, port, vhost, tls, username, password } = config
 
-    const yesTls = tls !== undefined ? tls : defaultTls
-    const protocol = yesTls ? 'amqps' : 'amqp'
-    const vhostName = vhost || defaultVhost
+    const protocol = tls ? 'amqps' : 'amqp'
+    const url = `${protocol}://${username}:${password}@${host}:${port}${vhost}`
 
-    const url = `${protocol}://${username}:${password}@${host}:${port}${vhostName}`
     return url
   }
 
@@ -251,19 +247,4 @@ export class AmqpClient {
       payload,
     }
   }
-}
-
-export const establishRabbitMqConnection = async (
-  amqpConfig?: AmqpConfig,
-  exchangeConfig?: ExchangeConfig,
-): Promise<AmqpClient> => {
-  const amqpClient = new AmqpClient(amqpConfig)
-
-  try {
-    await amqpClient.init(exchangeConfig || defaultExchangeConfig)
-  } catch (e) {
-    /* istanbul ignore next */
-    log.error(e)
-  }
-  return amqpClient
 }

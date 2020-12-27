@@ -7,7 +7,6 @@ const amqpConfigFixture: AmqpConfig = {
   host: '127.0.0.1',
   port: 5672,
   vhost: '/',
-  exchangeName: 'amq.topic',
   autoReconnect: true,
   prefetch: 0,
   retryConnectionInterval: 5000,
@@ -149,7 +148,10 @@ describe('AmqpClient', () => {
 
   describe('establishRabbitMqConnection()', () => {
     it('establishes a connection with default config', async () => {
-      const amqpClient = await establishRabbitMqConnection()
+      const amqpClient = await establishRabbitMqConnection(
+        { host: 'host', port: 5672, username: 'username', password: 'password' },
+        {},
+      )
       expect(amqpClient).toBeInstanceOf(AmqpClient)
     })
   })

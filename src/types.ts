@@ -3,7 +3,6 @@ import { ConsumeMessage } from 'amqplib'
 export interface AmqpConfig {
   host: string
   port: number
-  exchangeName: string
   username: string
   password: string
   appId?: string
