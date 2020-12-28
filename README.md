@@ -40,7 +40,6 @@ AmqpConfig {
 ExchangeConfig {
   exchangeName?: string - default: 'amq.direct'
   type?: 'direct' | 'fanout' | 'topic' | 'header' - default: 'direct'
-  routingKey?: string - default: ''
   durable?: boolean - default: false
   autoDelete?: boolean
 }

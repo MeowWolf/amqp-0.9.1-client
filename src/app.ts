@@ -126,7 +126,6 @@ export class AmqpClient {
 
   private async consume(queueConfig: QueueConfig, callback: ConsumerCallback): Promise<AmqpClient> {
     const config = {
-      routingKey: this.exchangeConfig.routingKey,
       ...defaultQueueConfig,
       ...queueConfig,
     }

@@ -25,7 +25,6 @@ export type RoutingKey = string
 export interface ExchangeConfig {
   exchangeName?: string
   type?: ExchangeType
-  routingKey?: RoutingKey
   durable?: boolean
   autoDelete?: boolean
 }

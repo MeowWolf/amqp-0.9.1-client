@@ -20,7 +20,6 @@ export const defaultAmqpConfig = {
 export const defaultExchangeConfig: ExchangeConfig = {
   exchangeName: 'amq.direct',
   type: ExchangeType.Direct,
-  routingKey: '',
   durable: true,
   autoDelete: false,
 }
