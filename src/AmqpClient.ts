@@ -183,7 +183,7 @@ export class AmqpClient {
     this.channel.bindQueue(q.queue, exchangeName, routingKey)
   }
 
-  public async close(): Promise<void> {
+  private async close(): Promise<void> {
     try {
       await this.channel.close()
     } catch (e) {
