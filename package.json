@@ -9,7 +9,8 @@
     "build:prod": "rimraf -rf dist && tsc -p . --sourceMap false",
     "test": "jest --verbose --runInBand --detectOpenHandles",
     "test:watch": "jest --watchAll",
-    "test:cov": "jest --verbose --collect-coverage"
+    "test:cov": "jest --verbose --collect-coverage",
+    "lint": "eslint \"src/**\""
   },
   "keywords": [],
   "author": "Amo DelBello <adelbello@meowwolf.com>",

@@ -1,3 +1,5 @@
+![](https://github.com/MeowWolf/amqp-0.9.1-client/workflows/Lint,%20Build,%20Test/badge.svg?branch=master)
+
 # @meowwolf/amqp-0.9.1-client
 
 A simple amqp client that facilitates publishing and subscribing to an amqp v0.9.1 RabbitMQ broker.

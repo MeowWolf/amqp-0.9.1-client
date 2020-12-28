@@ -1,4 +1,9 @@
 module.exports = {
+  settings: {
+    react: {
+      version: '999.999.999',
+    },
+  },
   parser: '@typescript-eslint/parser', // Specifies the ESLint parser
   extends: [
     'plugin:react/recommended', // Uses the recommended rules from    @eslint-plugin-react
