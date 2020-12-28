@@ -13,15 +13,6 @@ export interface AmqpConfig {
   retryConnectionInterval?: number
 }
 
-export enum ExchangeType {
-  Direct = 'direct',
-  Fanout = 'fanout',
-  Topic = 'topic',
-  Headers = 'header',
-}
-
-export type RoutingKey = string
-
 export interface ExchangeConfig {
   exchangeName?: string
   type?: ExchangeType
@@ -51,8 +42,16 @@ export interface SendToQueueOptions {
   headers?: GenericObject
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type MessagePayload = Record<string, any> | (Record<string, any> & Array<Record<string, any>>)
+export enum ExchangeType {
+  Direct = 'direct',
+  Fanout = 'fanout',
+  Topic = 'topic',
+  Headers = 'header',
+}
+
+export type RoutingKey = string
+
+export type MessagePayload = GenericObject | (GenericObject & Array<GenericObject>)
 
 export type AssembledMessage = ConsumeMessage & {
   payload: MessagePayload
