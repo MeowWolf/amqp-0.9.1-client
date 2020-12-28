@@ -21,7 +21,7 @@ export const establishRabbitMqConnection = async (
   const amqpClient = new AmqpClient(amqpConfig)
 
   try {
-    await amqpClient.init(exchangeConfig || defaultExchangeConfig)
+    await amqpClient.init(exchangeConfig)
   } catch (e) {
     /* istanbul ignore next */
     log.error(e)
@@ -113,8 +113,8 @@ export class AmqpClient {
     const { exchangeName, type, durable, autoDelete } = this.exchangeConfig
 
     await this.channel.assertExchange(exchangeName, type, {
-      durable: durable,
-      autoDelete: autoDelete,
+      durable,
+      autoDelete,
     })
   }
 

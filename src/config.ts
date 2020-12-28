@@ -21,8 +21,8 @@ export const defaultExchangeConfig: ExchangeConfig = {
   exchangeName: 'amq.direct',
   type: ExchangeType.Direct,
   routingKey: '',
-  durable: false,
-  autoDelete: true,
+  durable: true,
+  autoDelete: false,
 }
 
 export const defaultQueueConfig: QueueConfig = {

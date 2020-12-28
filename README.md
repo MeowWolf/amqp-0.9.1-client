@@ -10,13 +10,17 @@ $ npm i @meowwolf/amqp-0.9.1-client
 
 ## Usage
 
-### Create an amqpClient:
+### Import the module:
 
 ```javascript
 import { establishRabbitMqConnection } from '@meowwolf/amqp-0.9.1-client'
 // or
 const { establishRabbitMqConnection } = require('@meowwolf/amqp-0.9.1-client')
+```
 
+### Create an amqpClient:
+
+```javascript
 const amqpClient = await establishRabbitMqConnection(amqpConfig, exchangeConfig)
 
 /*
