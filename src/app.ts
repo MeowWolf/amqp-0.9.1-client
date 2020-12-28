@@ -2,6 +2,8 @@ import { log } from './logger'
 import { AmqpClient } from './AmqpClient'
 import { AmqpConfig, ExchangeConfig } from './types'
 
+export * from './types'
+
 export const createRabbitMqClient = async (
   amqpConfig: AmqpConfig,
   exchangeConfig: ExchangeConfig,

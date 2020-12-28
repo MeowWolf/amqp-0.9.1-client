@@ -12,7 +12,6 @@ import {
   PublishOptions,
   SendToQueueOptions,
 } from './types'
-export * from './types'
 
 export class AmqpClient {
   private amqpConfig: AmqpConfig
