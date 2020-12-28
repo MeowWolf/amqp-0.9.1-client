@@ -3,6 +3,7 @@ import { AmqpClient } from './AmqpClient'
 import { AmqpConfig, ExchangeConfig } from './types'
 
 export * from './types'
+export { AmqpClient } from './AmqpClient'
 
 export const createRabbitMqClient = async (
   amqpConfig: AmqpConfig,

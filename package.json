@@ -1,6 +1,6 @@
 {
   "name": "@meowwolf/amqp-0.9.1-client",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "description": "AMQP 0-9-1 Broker Client",
   "main": "dist/app.js",
   "scripts": {
