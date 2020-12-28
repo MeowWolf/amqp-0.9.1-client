@@ -84,7 +84,7 @@ amqpClient.publish(payloadString, publishOptions)
 /*
 PublishOptions {
   exchangeName?: string - defaults to exchangeConfig value
-  routingKey?: RoutingKey - defaults to exchangeConfig value
+  routingKey?: RoutingKey - default: ''
   correlationId?: string - default: ''
   headers?: GenericObject - default: {}
 }
