@@ -1,4 +1,4 @@
-![](https://github.com/MeowWolf/amqp-0.9.1-client/workflows/Lint,%20Build,%20Test/badge.svg?branch=master)
+![](https://github.com/MeowWolf/amqp-0.9.1-client/workflows/Lint,%20Build,%20Test/badge.svg?branch=main)
 
 # @meowwolf/amqp-0.9.1-client
 
