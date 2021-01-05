@@ -143,7 +143,9 @@ export class AmqpClient {
     }
     const { exchangeName, routingKey, correlationId, headers } = config
     try {
-      this.channel.publish(exchangeName, routingKey, Buffer.from(payload), { appId, correlationId, headers })
+      AmqpClient.parseRoutingKeys(routingKey).forEach(rk => {
+        this.channel.publish(exchangeName, rk, Buffer.from(payload), { appId, correlationId, headers })
+      })
     } catch (e) {
       log.warn('Exception while publishing message:', e.message)
     }
@@ -180,7 +182,9 @@ export class AmqpClient {
 
   private bindQueue(q: Replies.AssertQueue, routingKey: RoutingKey): void {
     const { exchangeName } = this.exchangeConfig
-    this.channel.bindQueue(q.queue, exchangeName, routingKey)
+    AmqpClient.parseRoutingKeys(routingKey).forEach(rk => {
+      this.channel.bindQueue(q.queue, exchangeName, rk)
+    })
   }
 
   public async close(): Promise<void> {
@@ -216,6 +220,14 @@ export class AmqpClient {
     const url = `${protocol}://${username}:${password}@${host}:${port}${vhost}`
 
     return url
+  }
+
+  private static parseRoutingKeys(routingKey: RoutingKey): string[] {
+    if (Array.isArray(routingKey)) {
+      return routingKey
+    }
+
+    return [routingKey]
   }
 
   private static assembleMessage(amqpMessage: ConsumeMessage): AssembledMessage {

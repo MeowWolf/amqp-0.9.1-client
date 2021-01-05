@@ -122,6 +122,12 @@ describe('AmqpClient', () => {
         expect.anything(),
       )
     })
+
+    it('publishes a message to more than one routing key', async () => {
+      const initializedAmqp = await amqp.init()
+      initializedAmqp.publish('I drank what?', { routingKey: ['first.one', 'second.one'] })
+      expect(initializedAmqp.channel.publish).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('sendToQueue()', () => {

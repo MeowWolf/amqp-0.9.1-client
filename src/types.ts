@@ -49,7 +49,7 @@ export enum ExchangeType {
   Headers = 'header',
 }
 
-export type RoutingKey = string
+export type RoutingKey = string | string[]
 
 export type MessagePayload = GenericObject | (GenericObject & Array<GenericObject>)
 
