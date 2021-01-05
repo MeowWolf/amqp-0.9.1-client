@@ -63,7 +63,7 @@ await amqpClient.addConsumer({
 /*
 QueueConfig {
   queueName?: string - default: ''
-  routingKey?: string - default: ''
+  routingKey?: string | string[] - default: ''
   exclusive?: boolean - default: true
   durable?: boolean - default: false
   autoDelete?: boolean - default: true
@@ -86,7 +86,7 @@ amqpClient.publish(payloadString, publishOptions)
 /*
 PublishOptions {
   exchangeName?: string - defaults to exchangeConfig value
-  routingKey?: RoutingKey - default: ''
+  routingKey?: string | string[] - default: ''
   correlationId?: string - default: ''
   headers?: GenericObject - default: {}
 }
