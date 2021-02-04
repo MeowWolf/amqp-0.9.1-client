@@ -34,6 +34,7 @@ export class AmqpClient {
     }
 
     try {
+      log.info('This is github not npm!')
       await this.connect()
       await this.createChannel()
       await this.assertExchange()
