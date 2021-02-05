@@ -17,6 +17,8 @@ export class AmqpClient {
   private amqpConfig: AmqpConfig
   private exchangeConfig: ExchangeConfig
   private consumers: Consumer[] = []
+  private isReconnecting = false
+
   public connection: Connection
   public channel: Channel
 
@@ -34,7 +36,6 @@ export class AmqpClient {
     }
 
     try {
-      log.info('This is github not npm!')
       await this.connect()
       await this.createChannel()
       await this.assertExchange()
@@ -62,25 +63,32 @@ export class AmqpClient {
 
     this.connection.on('error', (e): void => {
       log.error(e)
+      this.close()
     })
 
     this.connection.on('close', this.reconnect.bind(this))
   }
 
   private async reconnect(): Promise<void> {
-    log.warn('AMQP connection closed!')
-    const { autoReconnect, retryConnectionInterval } = this.amqpConfig
+    if (!this.isReconnecting) {
+      this.isReconnecting = true
+      log.warn('AMQP connection closed!')
+      const { autoReconnect, retryConnectionInterval } = this.amqpConfig
 
-    if (autoReconnect) {
-      log.info('Attempting to reconnect...')
-      setTimeout(async () => {
-        try {
-          await this.init(this.exchangeConfig)
-          log.warn('Reconnection successful!')
-        } catch (e) {
-          log.info('Unable to reconnect: ', e)
-        }
-      }, retryConnectionInterval)
+      if (autoReconnect) {
+        log.info('Attempting to reconnect...')
+        setTimeout(async () => {
+          try {
+            await this.init(this.exchangeConfig)
+            this.isReconnecting = false
+            log.warn('Reconnection successful!')
+          } catch (e) {
+            this.isReconnecting = false
+            log.info('Unable to reconnect: ', e)
+            this.reconnect()
+          }
+        }, retryConnectionInterval)
+      }
     }
   }
 
@@ -107,6 +115,7 @@ export class AmqpClient {
     this.consumers.push(consumer)
     const { config, callback } = consumer
     await this.consume(config, callback)
+    // }
   }
 
   private async consume(queueConfig: QueueConfig, callback: ConsumerCallback): Promise<AmqpClient> {
