@@ -115,7 +115,6 @@ export class AmqpClient {
     this.consumers.push(consumer)
     const { config, callback } = consumer
     await this.consume(config, callback)
-    // }
   }
 
   private async consume(queueConfig: QueueConfig, callback: ConsumerCallback): Promise<AmqpClient> {
