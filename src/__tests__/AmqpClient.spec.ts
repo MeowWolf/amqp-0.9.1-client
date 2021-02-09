@@ -52,6 +52,7 @@ describe('AmqpClient', () => {
     it('initializes', async () => {
       const initializedAmqp = await amqp.init()
       expect(initializedAmqp).toBeTruthy()
+      expect(log.info).toHaveBeenCalledWith(expect.stringContaining('XXXXXX:XXXXXX'))
     })
 
     it('initializes with alternate config', async () => {
