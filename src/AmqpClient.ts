@@ -59,7 +59,9 @@ export class AmqpClient {
   private async connect(): Promise<void> {
     const brokerUrl = AmqpClient.getBrokerUrl(this.amqpConfig)
     this.connection = await connect(brokerUrl)
-    log.info(`AMQP Successfully connected to ${brokerUrl} `)
+
+    const brokerUrlForLogs = AmqpClient.getBrokerUrl(this.amqpConfig, true)
+    log.info(`AMQP Successfully connected to ${brokerUrlForLogs} `)
 
     this.connection.on('error', (e): void => {
       log.error(e)
@@ -222,11 +224,13 @@ export class AmqpClient {
     return reducedConsumers
   }
 
-  private static getBrokerUrl(config: AmqpConfig): string {
+  private static getBrokerUrl(config: AmqpConfig, forLogs = false): string {
     const { host, port, vhost, tls, username, password } = config
 
     const protocol = tls ? 'amqps' : 'amqp'
-    const url = `${protocol}://${username}:${password}@${host}:${port}${vhost}`
+    const url = `${protocol}://${forLogs ? 'XXXXXX' : username}:${
+      forLogs ? 'XXXXXX' : password
+    }@${host}:${port}${vhost}`
 
     return url
   }
